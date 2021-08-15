@@ -1,0 +1,31 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
+  applicationContextPath: /
+  requestLog:
+    appenders:
+      - type: console
+        timeZone: IST
+
+
+logging:
+  level: INFO
+  loggers:
+    deprecation: ERROR
+    org.hibernate: ERROR
+    QueuedSender: WARN
+    com.codahale.metrics.collectd: ERROR
+    io.appform.idman: DEBUG
+  appenders:
+    - type: console
+      threshold: TRACE
+      timeZone: IST
+      logFormat: "%(%-5level) [%date] [%thread] [%logger{0}]: %message%n"
+
+kafka:
+  bootstrapHosts: ${BOOTSTRAP_HOSTS}
+  senderId: ${SENDER_ID}
