@@ -13,9 +13,6 @@ import java.util.Date;
 public class Event {
 
     @NotEmpty
-    private String topic;
-
-    @NotEmpty
     private String app;
 
     @NotEmpty
@@ -30,6 +27,8 @@ public class Event {
     private String eventSchemaVersion;
 
     private Date time = new Date();
+
+    private String topic;
 
     private Object eventData;
 }

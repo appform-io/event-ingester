@@ -8,14 +8,12 @@ import lombok.val;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -50,19 +48,17 @@ public class KafkaEventSink implements EventSink {
     @SneakyThrows
     public boolean send(List<Event> events) {
         val groupedEvents = events.stream()
+                .map(this::elaboratedEvent)
                 .collect(Collectors.groupingBy(Event::getTopic));
         log.debug("Events to be sent to topics: {}", groupedEvents.keySet());
         val futures = groupedEvents.entrySet()
                 .stream()
                 .flatMap(groupedEvent -> groupedEvent.getValue()
                         .stream()
-                        .map(event -> new ProducerRecord<>(
-                                groupedEvent.getKey(),
-                                Objects.requireNonNullElse(event.getPartitionKey(), UUID.randomUUID().toString()),
-                                event)))
+                        .map(event -> new ProducerRecord<>(groupedEvent.getKey(), event.getPartitionKey(), event)))
                 .map(producer::send)
                 .collect(Collectors.toUnmodifiableList());
-        val pushed = (Long) futures.stream()
+        val pushed = futures.stream()
                 .map(future -> {
                     try {
                         return future.get(2, TimeUnit.SECONDS);
@@ -76,8 +72,20 @@ public class KafkaEventSink implements EventSink {
                     return null;
                 })
                 .filter(Objects::nonNull)
-                .count();
-        log.debug("Pushed {} events", pushed);
-        return pushed == events.size();
+                .collect(Collectors.groupingBy(RecordMetadata::topic, Collectors.counting()));
+        log.debug("Pushed events: {}", pushed);
+        return pushed.values().stream().reduce(0L, Long::sum) == events.size();
+    }
+
+    private Event elaboratedEvent(Event event) {
+        return new Event(event.getApp(),
+                         event.getEventType(),
+                         Objects.requireNonNullElse(event.getId(), UUID.randomUUID().toString()),
+                         Objects.requireNonNullElse(event.getEventData(), Collections.emptyMap()),
+                         Objects.requireNonNullElse(event.getTopic(), event.getApp()),
+                         Objects.requireNonNullElse(event.getGroupingKey(), UUID.randomUUID().toString()),
+                         Objects.requireNonNullElse(event.getPartitionKey(), UUID.randomUUID().toString()),
+                         Objects.requireNonNullElse(event.getEventSchemaVersion(), "v1"),
+                         Objects.requireNonNullElse(event.getTime(), new Date()));
     }
 }
