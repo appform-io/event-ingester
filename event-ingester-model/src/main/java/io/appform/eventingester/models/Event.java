@@ -1,6 +1,9 @@
 package io.appform.eventingester.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 import java.util.Date;
@@ -10,6 +13,9 @@ import java.util.Date;
  * @author shashank.g
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Event {
 
     @NotEmpty
@@ -18,17 +24,15 @@ public class Event {
     @NotEmpty
     private String eventType;
 
-    @NotEmpty
     private String id;
+    private Object eventData;
 
-    @NotEmpty
+    private String topic;
     private String groupingKey;
     private String partitionKey;
     private String eventSchemaVersion;
 
-    private Date time = new Date();
+    private Date time;
 
-    private String topic;
 
-    private Object eventData;
 }

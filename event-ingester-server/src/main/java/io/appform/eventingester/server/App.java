@@ -24,7 +24,7 @@ public class App extends Application<AppConfig> {
                                                new EnvironmentVariableSubstitutor(true)));
 
         bootstrap.addBundle(
-                GuiceBundle.<AppConfig>builder()
+                GuiceBundle.builder()
                         .enableAutoConfig("io.appform.eventingester.server.resources")
                         .modules(new CoreModule())
                         .printDiagnosticInfo()
