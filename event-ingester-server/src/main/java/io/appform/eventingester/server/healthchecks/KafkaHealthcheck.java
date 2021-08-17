@@ -1,4 +1,4 @@
-package io.appform.eventingester.server;
+package io.appform.eventingester.server.healthchecks;
 
 import io.appform.eventingester.server.kafka.KafkaConfig;
 import lombok.val;
@@ -16,7 +16,7 @@ public class KafkaHealthcheck extends NamedHealthCheck {
     private final AdminClient adminClient;
 
     @Inject
-    public KafkaHealthcheck(KafkaConfig config, AdminClient adminClient) {
+    public KafkaHealthcheck(KafkaConfig config) {
         val properties = new Properties();
         properties.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.getBootstrapHosts());
         this.adminClient = AdminClient.create(properties);

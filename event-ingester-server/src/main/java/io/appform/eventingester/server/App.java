@@ -8,6 +8,7 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import lombok.val;
 import ru.vyarus.dropwizard.guice.GuiceBundle;
+import ru.vyarus.dropwizard.guice.module.installer.feature.health.HealthCheckInstaller;
 
 import static io.appform.eventingester.server.Utils.configureMapper;
 
@@ -25,8 +26,10 @@ public class App extends Application<AppConfig> {
 
         bootstrap.addBundle(
                 GuiceBundle.builder()
-                        .enableAutoConfig("io.appform.eventingester.server.resources")
+                        .enableAutoConfig("io.appform.eventingester.server.resources",
+                                          "io.appform.eventingester.server.healthchecks")
                         .modules(new CoreModule())
+                        .installers(HealthCheckInstaller.class)
                         .printDiagnosticInfo()
                         .build(Stage.PRODUCTION));
     }
