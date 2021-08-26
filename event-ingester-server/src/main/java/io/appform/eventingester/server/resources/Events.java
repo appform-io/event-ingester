@@ -35,7 +35,7 @@ public class Events {
     }
 
     @POST
-    @Path("/v1")
+    @Path("/v1/bulk")
     public Response ingestEvents(@Valid final List<Event> events) {
         val status = eventSink.send(events);
         log.debug("Event ingestion status: {}", status);
